@@ -1,52 +1,64 @@
 #include <RCSwitch.h>
 
-RCSwitch my_rf = RCSwitch();  // An object for the rf module
+RCSwitch my_rf = RCSwitch();  // An object for the RF module
 
-const int button = 4;  // pin connected to the button
-bool signal = false;
-int binary_value;
-int bitlength;  
-int reci_delay;  
-int protocol;
+const int buttonPin = 4;  // pin connected to the button
+const int ledPin = 13;    // built-in LED pin
+
+bool buttonState = HIGH;       
+bool lastButtonState = HIGH; 
+
+bool signalCaptured = false;  
+int binaryValue = 0;
+int bitLength = 0;      // initializing variables
+int protocol = 0;
 
 void setup() {
   Serial.begin(9600);
   
-  my_rf.enableReceive(0);  // Receiver on interrupt 0 => that is pin 2 on arduino uno/nano
-  my_rf.enableTransmit(3); // Transmitter on pin 3, can be any digital pin
-
-  pinMode(button, INPUT_PULLUP);  // set the button pin as input with internal pull-up resistor
+  my_rf.enableReceive(0);  // receiver on pin 2 for interrupt 0
+  my_rf.enableTransmit(3); // transmitter on pin 3
+  
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);         
+  digitalWrite(ledPin, LOW);
 }
 
 void loop() {
-  // capture the signal
-  if (my_rf.available()) { 
-    binary_value = my_rf.getReceivedValue();
-    bitlength = my_rf.getReceivedBitlength();
-    reci_delay = my_rf.getReceivedDelay();
+  if (!signalCaptured && my_rf.available()) {
+    binaryValue = my_rf.getReceivedValue();
+    bitLength = my_rf.getReceivedBitlength();
     protocol = my_rf.getReceivedProtocol();
     
-    // display captured values
-    if (binary_value != 0) {
-      Serial.print("Received code: ");
-      Serial.println(binary_value);
+    if (binaryValue != 0) {
+      Serial.print("Signal captured: ");
+      Serial.println(binaryValue);
       Serial.print("Bit length: ");
-      Serial.println(bitlength);
-      Serial.print("Delay: ");
-      Serial.println(reci_delay);
+      Serial.println(bitLength);
       Serial.print("Protocol: ");
       Serial.println(protocol);
 
-      signal = true;  // This will indicate a signal is captured
-      my_rf.resetAvailable();  // reset the receiver for capturing next signal
+      signalCaptured = true; 
+      my_rf.resetAvailable();  // Reset receiver 
     }
   }
 
-  // if signal is captured and button is pressed, signal is transmitted
-  if (signal && digitalRead(button) == LOW) {
-    my_rf.setProtocol(protocol);  // set the protocol
-    my_rf.send(binary_value, bitlength);  // send the stored values
-    Serial.println("signal retransmitted.");
-    delay(500);  // delay
+  buttonState = digitalRead(buttonPin);  
+
+  if (buttonState == LOW && lastButtonState == HIGH) {
+    // Blink the LED once
+    digitalWrite(ledPin, HIGH);
+    delay(200);  
+    digitalWrite(ledPin, LOW);
+
+    if (signalCaptured) {
+      my_rf.setProtocol(protocol);  // Set the protocol for transmission
+      my_rf.send(binaryValue, bitLength);  // Send the captured signal
+      Serial.println("Signal retransmitted.");
+    } else {
+      Serial.println("No signal captured yet.");
+    }
   }
+
+  lastButtonState = buttonState;
 }
