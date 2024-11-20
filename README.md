@@ -4,17 +4,15 @@ This project demonstrates a replay attack using an Arduino board and radio frequ
 
 ## **Components Needed**
 1. **Arduino Board**: Uno, Nano, or other compatible models.
-2. **433MHz/315MHz RF Modules**: FS1000A is recommended for its flexibility with both frequencies.
+2. **433MHz/315MHz RF Modules**: FS1000A is recommended 
 3. **Jumper Wires**: To connect components.
 4. **Push Button (2-pin)**: Used to trigger transmission.
 5. **Antenna for RF Module (Optional)**: Improves signal range and reliability.
 
 ### **RF Module FS1000A**
-This module can operate on both 433MHz and 315MHz frequencies.
+This module have two versions one working at 315mhz and the other at 433mhz the frequency used by devices varies in places but 433mhz is the most common one keep this in mind while buying this. 
 
 ![433MHz Radio Module](https://github.com/user-attachments/assets/ff3e5f46-3600-4a97-903f-3a51a0c7b552)
-
----
 
 ## **Wiring Diagram**
 The following connections are required for the setup:
@@ -24,6 +22,11 @@ The following connections are required for the setup:
 3. **5V Pin (Arduino)** → **5V on both Receiver and Transmitter**
 4. **GND (Arduino)** → **GND on both Receiver and Transmitter**
 5. **Pin 4 (Arduino)** → One side of the push button (Other side to GND)
-![Push Button Circuit](https://github.com/user-attachments/assets/6bf3aef0-6bfd-4d96-aaa3-4495cee3fc50)
+![fs1000a-pinout](https://github.com/user-attachments/assets/b2234e3e-bde6-494d-876f-9cd5f12cc1ca)
 
----
+## Workflow
+- After turning on the device it listens for incoming signals
+- After capturing the signal, pressing the button causes the LED on the Arduino board to blink, and the signal is replayed once.
+- Finally, pressing the reset button restarts the device, causing the code to execute from the beginning and enabling it to listen for new signals.
+
+
